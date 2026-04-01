@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bullet Journal</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --surface: #ffffff;
+  --border: #e4e0d8;
+  --text: #1c1c1a;
+  --text-muted: #908e8a;
+  --accent: #2a3d2a;
+  --accent-soft: #eaf0ea;
+  --done-color: #b0ada8;
+  --danger: #b83232;
+  --sidebar-w: 210px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0 1rem;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 10;
+}
+.sidebar-brand {
+  padding: 0 1.5rem 2.25rem;
+}
+.sidebar-brand-main {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.sidebar-brand-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+.nav-group { padding: 0 0.625rem; }
+.nav-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 0.625rem 0.4rem;
+  margin-top: 1.25rem;
+  display: block;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: background 0.12s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.nav-sym { width: 18px; text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+.nav-item.active .nav-sym { color: var(--accent); }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 1.5rem 0;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+.sidebar-footer kbd {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 0.65rem;
+  font-family: inherit;
+}
+
+/* ---- Main ---- */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  max-width: 660px;
+  padding: 2.75rem 2.25rem 4rem;
+}
+
+/* ---- Date nav ---- */
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.375rem;
+}
+.nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  padding: 0.2rem 0.55rem;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.today-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  background: var(--accent-soft);
+  border-radius: 4px;
+}
+.date-heading {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: normal;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+}
+.date-sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+}
+.view-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.6rem;
+  font-weight: normal;
+  margin-bottom: 1.75rem;
+  color: var(--text);
+}
+
+/* ---- Entry list ---- */
+.entry-list { list-style: none; margin-bottom: 0.5rem; }
+.entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 42px;
+}
+.entry-sym {
+  width: 20px;
+  min-width: 20px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text);
+  transition: transform 0.12s, color 0.12s;
+  user-select: none;
+  padding-top: 0.1rem;
+}
+.entry-sym:hover { color: var(--accent); transform: scale(1.15); }
+.entry-text {
+  flex: 1;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text);
+  padding-top: 0.15rem;
+  word-break: break-word;
+}
+.entry.done .entry-sym { color: var(--done-color); }
+.entry.done .entry-text { text-decoration: line-through; color: var(--done-color); }
+.entry.migrated .entry-text { color: var(--text-muted); font-style: italic; }
+.entry.migrated .entry-sym { color: var(--text-muted); }
+.entry.cancelled .entry-text { text-decoration: line-through; color: var(--done-color); opacity: 0.7; }
+.entry-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.3rem;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.entry:hover .entry-del { opacity: 1; }
+.entry-del:hover { color: var(--danger); background: #fdf0f0; }
+
+/* ---- Add form ---- */
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0;
+  border-bottom: 2px solid var(--border);
+  margin-top: 0.25rem;
+}
+.type-pills {
+  display: flex;
+  gap: 1px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.type-pill {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  transition: all 0.12s;
+  font-family: inherit;
+  line-height: 1.3;
+}
+.type-pill.on { background: var(--surface); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.07); }
+.add-input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 0.9375rem;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+  padding: 0.25rem 0;
+  min-width: 0;
+}
+.add-input::placeholder { color: var(--text-muted); }
+
+/* ---- Legend ---- */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+.legend span { display: flex; align-items: center; gap: 4px; }
+
+/* ---- Monthly ---- */
+.month-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.month-title { font-family: Georgia, serif; font-size: 1.4rem; font-weight: normal; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 1.5rem; }
+.cal-dow {
+  text-align: center;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.375rem 0;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.12s;
+  color: var(--text);
+}
+.cal-cell:hover:not(.empty) { background: var(--accent-soft); }
+.cal-cell.today { background: var(--accent); color: #fff; }
+.cal-cell.has-dot::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.cal-cell.today.has-dot::after { background: rgba(255,255,255,0.65); }
+.cal-cell.empty { cursor: default; }
+.cal-cell.dim { color: var(--text-muted); }
+.month-stats { display: flex; gap: 2rem; font-size: 0.8125rem; color: var(--text-muted); }
+.month-stats strong { color: var(--text); }
+
+/* ---- Future log ---- */
+.future-block { margin-bottom: 2rem; }
+.future-month-head {
+  font-family: Georgia, serif;
+  font-size: 0.9375rem;
+  font-weight: normal;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.375rem;
+  margin-bottom: 0.625rem;
+}
+.future-add-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 2px solid var(--border);
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+.future-add-row input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  background: none;
+  font-size: 0.9375rem;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+  padding: 0.25rem 0;
+}
+.future-add-row input[type="text"]::placeholder { color: var(--text-muted); }
+.future-add-row input[type="month"] {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.275rem 0.5rem;
+  font-size: 0.8125rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.375rem 0.875rem;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  transition: opacity 0.12s;
+}
+.btn-accent:hover { opacity: 0.88; }
+.future-move-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  transition: all 0.12s;
+  font-family: inherit;
+  opacity: 0;
+}
+.entry:hover .future-move-btn { opacity: 1; }
+.future-move-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- Collections ---- */
+.col-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.col-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1rem 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.col-card:hover { border-color: var(--accent); }
+.col-card-name { font-size: 0.9375rem; margin-bottom: 0.25rem; }
+.col-card-ct { font-size: 0.75rem; color: var(--text-muted); }
+.col-add-card {
+  border-style: dashed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  min-height: 76px;
+}
+.col-new-form {
+  padding: 1rem 0;
+  display: none;
+}
+.col-new-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  font-size: 0.9375rem;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+  padding: 0.25rem 0 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.col-new-input::placeholder { color: var(--text-muted); }
+.col-detail-back {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+.col-detail-back .view-title { margin: 0; }
+.del-col-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: inherit;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  transition: color 0.12s;
+}
+.del-col-btn:hover { color: var(--danger); }
+
+/* ---- Empty ---- */
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2.5rem 0;
+  font-size: 0.875rem;
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 620px) {
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    position: fixed;
+    top: auto; bottom: 0; left: 0; right: 0;
+    flex-direction: row;
+    padding: 0;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .sidebar-brand, .nav-label, .sidebar-footer { display: none; }
+  .nav-group { display: flex; flex-direction: row; flex: 1; padding: 0; }
+  .nav-item {
+    flex: 1; flex-direction: column; justify-content: center;
+    gap: 2px; padding: 0.5rem 0.25rem; border-radius: 0;
+    font-size: 0.625rem; text-align: center;
+  }
+  .nav-sym { font-size: 1.1rem; width: auto; }
+  .main {
+    margin-left: 0; padding: 1.5rem 1rem 5.5rem;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-main">bujo</div>
+    <div class="sidebar-brand-sub">bullet journal</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-item active" id="nav-daily" onclick="switchView('daily')">
+      <span class="nav-sym">◆</span> Daily
+    </div>
+    <div class="nav-item" id="nav-monthly" onclick="switchView('monthly')">
+      <span class="nav-sym">▦</span> Monthly
+    </div>
+    <div class="nav-item" id="nav-future" onclick="switchView('future')">
+      <span class="nav-sym">›</span> Future
+    </div>
+    <div class="nav-item" id="nav-collections" onclick="switchView('collections')">
+      <span class="nav-sym">≡</span> Collections
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <kbd>Enter</kbd> to add &nbsp; <kbd>click ●</kbd> to cycle state
+  </div>
+</nav>
+
+<main class="main" id="app"></main>
+
+<script>
+const P = 'bujo_';
+function ls(k, fb) {
+  try { const v = localStorage.getItem(P+k); return v ? JSON.parse(v) : fb; } catch(e) { return fb; }
+}
+function ss(k, v) { try { localStorage.setItem(P+k, JSON.stringify(v)); } catch(e) {} }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let view = 'daily';
+let curDate = new Date();
+let selType = ls('selType', 'task');
+let curColId = null;
+
+function dk(d) { return d.toISOString().split('T')[0]; }
+
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+function fmtDow(d) {
+  return d.toLocaleDateString('en-US', { weekday: 'long' });
+}
+function isToday(d) { return dk(d) === dk(new Date()); }
+
+// Symbols
+function sym(entry) {
+  if (entry.type === 'event') return '○';
+  if (entry.type === 'note') return '&#8212;';
+  const map = { open: '&#8226;', done: '&#215;', migrated: '&#8250;', cancelled: '&#8211;' };
+  return map[entry.state || 'open'] || '&#8226;';
+}
+function nextState(state) {
+  return { open: 'done', done: 'migrated', migrated: 'cancelled', cancelled: 'open' }[state || 'open'] || 'open';
+}
+
+// Daily
+function getDailyEntries(d) { return ls('d_' + dk(d), []); }
+function setDailyEntries(d, arr) { ss('d_' + dk(d), arr); }
+
+// Collections
+function getCols() { return ls('cols', []); }
+function setCols(arr) { ss('cols', arr); }
+
+// Future
+function getFuture() { return ls('future', []); }
+function setFuture(arr) { ss('future', arr); }
+
+// Nav
+function switchView(v) {
+  view = v;
+  curColId = null;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + v).classList.add('active');
+  render();
+}
+
+// Render
+function render() {
+  const el = document.getElementById('app');
+  if (view === 'daily') el.innerHTML = renderDaily();
+  else if (view === 'monthly') el.innerHTML = renderMonthly();
+  else if (view === 'future') el.innerHTML = renderFuture();
+  else if (view === 'collections') el.innerHTML = curColId ? renderColDetail(curColId) : renderCollections();
+  wire();
+}
+
+function entryItem(entry, actions) {
+  const sc = (entry.type === 'task') ? (entry.state || 'open') : '';
+  return `<li class="entry ${sc}" data-id="${entry.id}">
+    <span class="entry-sym" data-role="sym">${sym(entry)}</span>
+    <span class="entry-text">${esc(entry.text)}</span>
+    ${actions || ''}
+  </li>`;
+}
+
+function addForm(placeholder) {
+  return `<div class="add-row" id="add-row">
+    <div class="type-pills">
+      <button class="type-pill ${selType==='task'?'on':''}" data-tp="task" title="Task">&#8226;</button>
+      <button class="type-pill ${selType==='event'?'on':''}" data-tp="event" title="Event">&#9675;</button>
+      <button class="type-pill ${selType==='note'?'on':''}" data-tp="note" title="Note">&#8212;</button>
+    </div>
+    <input class="add-input" id="add-input" type="text" placeholder="${placeholder}" autocomplete="off" spellcheck="true">
+  </div>`;
+}
+
+function renderDaily() {
+  const entries = getDailyEntries(curDate);
+  const today = isToday(curDate);
+
+  const items = entries.map(e => entryItem(e,
+    `<button class="entry-del" data-role="del" title="Delete">&#215;</button>`
+  )).join('');
+
+  return `
+  <div class="date-nav">
+    <button class="nav-btn" id="prev">&#8592;</button>
+    ${today ? '<span class="today-badge">Today</span>' : ''}
+    <button class="nav-btn" id="next">&#8594;</button>
+    ${!today ? '<button class="nav-btn" id="goto-today">Today</button>' : ''}
+  </div>
+  <div class="date-heading">${fmtDate(curDate)}</div>
+  <div class="date-sub">${fmtDow(curDate)}</div>
+  <div class="legend">
+    <span>&#8226; task</span>
+    <span>&#9675; event</span>
+    <span>&#8212; note</span>
+    <span style="opacity:.7">&#215; done &nbsp; &#8250; migrated &nbsp; &#8211; cancelled</span>
+  </div>
+  ${entries.length ? `<ul class="entry-list" id="entry-list">${items}</ul>` : '<div class="empty" id="entry-list">Nothing logged yet.</div>'}
+  ${addForm('Rapid log...')}`;
+}
+
+function renderMonthly() {
+  const today = new Date();
+  const yr = today.getFullYear();
+  const mo = today.getMonth();
+  const first = new Date(yr, mo, 1);
+  const last = new Date(yr, mo + 1, 0);
+  const dow = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  let cells = dow.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < first.getDay(); i++) cells += `<div class="cal-cell empty dim"></div>`;
+  for (let d = 1; d <= last.getDate(); d++) {
+    const date = new Date(yr, mo, d);
+    const key = dk(date);
+    const ents = ls('d_' + key, []);
+    const isT = dk(today) === key;
+    const hasDot = ents.length > 0;
+    cells += `<div class="cal-cell ${isT?'today':''} ${hasDot?'has-dot':''}" data-date="${key}">${d}</div>`;
+  }
+
+  let open = 0, done = 0;
+  for (let d = 1; d <= last.getDate(); d++) {
+    const ents = ls('d_' + dk(new Date(yr, mo, d)), []);
+    open += ents.filter(e => e.type==='task' && (e.state||'open')==='open').length;
+    done += ents.filter(e => e.type==='task' && e.state==='done').length;
+  }
+
+  const mLabel = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return `
+  <div class="view-title">${mLabel}</div>
+  <div class="cal-grid">${cells}</div>
+  <div class="month-stats">
+    <span>Open tasks: <strong>${open}</strong></span>
+    <span>Completed: <strong>${done}</strong></span>
+    <span>Days with entries: <strong>${(() => {
+      let c = 0;
+      for (let d = 1; d <= last.getDate(); d++) {
+        if ((ls('d_' + dk(new Date(yr,mo,d)), [])).length) c++;
+      }
+      return c;
+    })()}</strong></span>
+  </div>`;
+}
+
+function renderFuture() {
+  const all = getFuture();
+  const grouped = {};
+  all.forEach(e => {
+    const k = e.targetDate
+      ? new Date(e.targetDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      : 'Unscheduled';
+    if (!grouped[k]) grouped[k] = [];
+    grouped[k].push(e);
+  });
+
+  const blocks = Object.keys(grouped).map(m => `
+    <div class="future-block">
+      <div class="future-month-head">${m}</div>
+      <ul class="entry-list">
+        ${grouped[m].map(e => `
+          <li class="entry" data-fid="${e.id}">
+            <span class="entry-sym">&#8250;</span>
+            <span class="entry-text">${esc(e.text)}</span>
+            <button class="future-move-btn" data-role="move-today" title="Move to today">&#8594; today</button>
+            <button class="entry-del" data-role="del-future" title="Delete">&#215;</button>
+          </li>`).join('')}
+      </ul>
+    </div>`).join('');
+
+  return `
+  <div class="view-title">Future Log</div>
+  ${all.length ? blocks : '<div class="empty">Nothing scheduled yet.</div>'}
+  <div class="future-add-row">
+    <input type="text" id="fut-text" placeholder="Schedule something...">
+    <input type="month" id="fut-month">
+    <button class="btn-accent" id="fut-add">Add</button>
+  </div>`;
+}
+
+function renderCollections() {
+  const cols = getCols();
+  const cards = cols.map(c => `
+    <div class="col-card" data-cid="${c.id}">
+      <div class="col-card-name">${esc(c.name)}</div>
+      <div class="col-card-ct">${c.items.length} ${c.items.length === 1 ? 'item' : 'items'}</div>
+    </div>`).join('');
+
+  return `
+  <div class="view-title">Collections</div>
+  <div class="col-grid" id="col-grid">
+    ${cards}
+    <div class="col-card col-add-card" id="add-col-btn">+ New collection</div>
+  </div>
+  <div class="col-new-form" id="col-form">
+    <input class="col-new-input" id="col-name" type="text" placeholder="Collection name...">
+    <div style="display:flex;gap:.5rem">
+      <button class="btn-accent" id="col-submit">Create</button>
+      <button class="nav-btn" id="col-cancel">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function renderColDetail(colId) {
+  const cols = getCols();
+  const col = cols.find(c => c.id === colId);
+  if (!col) { curColId = null; return renderCollections(); }
+
+  const items = col.items.map(item => entryItem(item,
+    `<button class="entry-del" data-role="del-ci" title="Delete">&#215;</button>`
+  )).join('');
+
+  return `
+  <div class="col-detail-back">
+    <button class="nav-btn" id="col-back">&#8592;</button>
+    <div class="view-title">${esc(col.name)}</div>
+    <button class="del-col-btn" id="del-col">Delete collection</button>
+  </div>
+  ${col.items.length ? `<ul class="entry-list" id="entry-list">${items}</ul>` : '<div class="empty" id="entry-list">No items yet.</div>'}
+  ${addForm('Add to collection...')}`;
+}
+
+// Wire events
+function wire() {
+  const inp = document.getElementById('add-input');
+  if (inp) {
+    inp.focus();
+    inp.onkeydown = e => {
+      if (e.key === 'Enter') {
+        const t = inp.value.trim();
+        if (!t) return;
+        if (view === 'daily') {
+          const arr = getDailyEntries(curDate);
+          arr.push({ id: uid(), type: selType, text: t, state: 'open', ts: Date.now() });
+          setDailyEntries(curDate, arr);
+          render();
+        } else if (view === 'collections' && curColId) {
+          const cols = getCols();
+          const col = cols.find(c => c.id === curColId);
+          if (col) {
+            col.items.push({ id: uid(), type: selType, text: t, state: 'open', ts: Date.now() });
+            setCols(cols);
+            render();
+          }
+        }
+      }
+    };
+  }
+
+  document.querySelectorAll('.type-pill').forEach(btn => {
+    btn.onclick = () => {
+      selType = btn.dataset.tp;
+      ss('selType', selType);
+      document.querySelectorAll('.type-pill').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    };
+  });
+
+  // Daily entry toggle / delete
+  const list = document.getElementById('entry-list');
+  if (list && view === 'daily') {
+    list.onclick = e => {
+      const li = e.target.closest('.entry');
+      if (!li) return;
+      const id = li.dataset.id;
+      const arr = getDailyEntries(curDate);
+      if (e.target.dataset.role === 'del') {
+        if (confirm('Delete this entry?')) {
+          setDailyEntries(curDate, arr.filter(x => x.id !== id));
+          render();
+        }
+      } else if (e.target.dataset.role === 'sym') {
+        const entry = arr.find(x => x.id === id);
+        if (entry && entry.type === 'task') entry.state = nextState(entry.state);
+        setDailyEntries(curDate, arr);
+        render();
+      }
+    };
+  }
+
+  // Collection detail toggle / delete
+  if (list && view === 'collections' && curColId) {
+    list.onclick = e => {
+      const li = e.target.closest('.entry');
+      if (!li) return;
+      const id = li.dataset.id;
+      const cols = getCols();
+      const col = cols.find(c => c.id === curColId);
+      if (!col) return;
+      if (e.target.dataset.role === 'del-ci') {
+        if (confirm('Delete this item?')) {
+          col.items = col.items.filter(x => x.id !== id);
+          setCols(cols);
+          render();
+        }
+      } else if (e.target.dataset.role === 'sym') {
+        const item = col.items.find(x => x.id === id);
+        if (item && item.type === 'task') item.state = nextState(item.state);
+        setCols(cols);
+        render();
+      }
+    };
+  }
+
+  // Date nav
+  document.getElementById('prev')?.addEventListener('click', () => {
+    curDate = new Date(curDate.getTime() - 86400000);
+    render();
+  });
+  document.getElementById('next')?.addEventListener('click', () => {
+    curDate = new Date(curDate.getTime() + 86400000);
+    render();
+  });
+  document.getElementById('goto-today')?.addEventListener('click', () => {
+    curDate = new Date();
+    render();
+  });
+
+  // Monthly day click
+  document.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
+    cell.onclick = () => {
+      const d = cell.dataset.date;
+      if (d) {
+        curDate = new Date(d + 'T12:00:00');
+        switchView('daily');
+      }
+    };
+  });
+
+  // Future
+  const futAdd = document.getElementById('fut-add');
+  const futText = document.getElementById('fut-text');
+  const futMonth = document.getElementById('fut-month');
+  function addFut() {
+    const t = futText?.value.trim();
+    if (!t) return;
+    const arr = getFuture();
+    arr.push({ id: uid(), text: t, targetDate: futMonth?.value ? futMonth.value + '-01' : null, ts: Date.now() });
+    setFuture(arr);
+    render();
+  }
+  futAdd?.addEventListener('click', addFut);
+  futText?.addEventListener('keydown', e => { if (e.key === 'Enter') addFut(); });
+
+  // Future list actions
+  document.querySelectorAll('[data-fid]').forEach(li => {
+    li.querySelector('[data-role="del-future"]')?.addEventListener('click', () => {
+      if (confirm('Delete this item?')) {
+        setFuture(getFuture().filter(x => x.id !== li.dataset.fid));
+        render();
+      }
+    });
+    li.querySelector('[data-role="move-today"]')?.addEventListener('click', () => {
+      const entry = getFuture().find(x => x.id === li.dataset.fid);
+      if (entry) {
+        const arr = getDailyEntries(new Date());
+        arr.push({ id: uid(), type: 'task', text: entry.text, state: 'open', ts: Date.now() });
+        setDailyEntries(new Date(), arr);
+        setFuture(getFuture().filter(x => x.id !== li.dataset.fid));
+        curDate = new Date();
+        switchView('daily');
+      }
+    });
+  });
+
+  // Collections grid
+  document.querySelectorAll('.col-card[data-cid]').forEach(card => {
+    card.onclick = () => {
+      curColId = card.dataset.cid;
+      render();
+    };
+  });
+
+  document.getElementById('add-col-btn')?.addEventListener('click', () => {
+    const form = document.getElementById('col-form');
+    form.style.display = 'block';
+    document.getElementById('col-name').focus();
+  });
+  document.getElementById('col-cancel')?.addEventListener('click', () => {
+    document.getElementById('col-form').style.display = 'none';
+  });
+  function submitCol() {
+    const name = document.getElementById('col-name')?.value.trim();
+    if (!name) return;
+    const cols = getCols();
+    const id = uid();
+    cols.push({ id, name, items: [], ts: Date.now() });
+    setCols(cols);
+    curColId = id;
+    render();
+  }
+  document.getElementById('col-submit')?.addEventListener('click', submitCol);
+  document.getElementById('col-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitCol(); });
+
+  // Collection detail back / delete
+  document.getElementById('col-back')?.addEventListener('click', () => { curColId = null; render(); });
+  document.getElementById('del-col')?.addEventListener('click', () => {
+    if (confirm('Delete this collection and all its items?')) {
+      setCols(getCols().filter(c => c.id !== curColId));
+      curColId = null;
+      render();
+    }
+  });
+}
+
+// Boot
+render();
+</script>
+</body>
+</html>
