@@ -96,6 +96,25 @@ body {
   font-size: 0.65rem;
   font-family: inherit;
 }
+.data-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 0.75rem;
+}
+.data-btn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  padding: 0.3rem 0;
+  font-family: inherit;
+  transition: all 0.12s;
+  text-align: center;
+}
+.data-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---- Main ---- */
 .main {
@@ -503,6 +522,11 @@ body {
   </div>
   <div class="sidebar-footer">
     <kbd>Enter</kbd> to add &nbsp; <kbd>click ●</kbd> to cycle state
+    <div class="data-btns">
+      <button class="data-btn" id="btn-export">&#8595; Export</button>
+      <button class="data-btn" id="btn-import">&#8593; Import</button>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
 </nav>
 
@@ -926,8 +950,53 @@ function wire() {
   });
 }
 
+// Export / Import
+function exportData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(P)) {
+      try { data[k.slice(P.length)] = JSON.parse(localStorage.getItem(k)); } catch(e) {}
+    }
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bujo-export-' + dk(new Date()) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (typeof data !== 'object' || Array.isArray(data)) throw new Error();
+      const keys = Object.keys(data);
+      if (!confirm(`This will merge ${keys.length} data key(s) into your journal. Existing entries on matching days will be overwritten. Continue?`)) return;
+      keys.forEach(k => ss(k, data[k]));
+      render();
+      alert('Import complete.');
+    } catch(err) {
+      alert('Could not read the file. Make sure it is a valid bujo export.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('btn-export').addEventListener('click', exportData);
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('import-file').value = '';
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', e => {
+  if (e.target.files[0]) importData(e.target.files[0]);
+});
+
 // Boot
 render();
 </script>
 </body>
 </html>
+
